@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter</title>
+    
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-center">Inscreva-se agora!</h4>
+                        <p class="text-center">Preencha o formulário abaixo para se inscrever e comece a receber nossas atualizações diretamente em sua caixa de entrada.</p>
+                        <ul>
+                            <li><strong>Guias e Tutoriais:</strong> Aprenda como implementar e otimizar soluções de IoT para sua empresa.</li>
+                            <li><strong>Notícias e Tendências:</strong> Fique por dentro das últimas novidades e avanços no mundo do IoT.</li>
+                            <li><strong>Ofertas e Promoções:</strong> Receba ofertas especiais e promoções exclusivas para assinantes da nossa newsletter.</li>
+                        </ul>
+                        <form id="subscribe-form">
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input type="email" class="form-control" id="email" placeholder="email@email.com" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Inscrever-se</button>
+                        </form>
+                        <div id="message" class="mt-3"></div>
+                        <p class="text-center mt-3"><a href="#" id="unsubscribe-link">Desinscrever-se</a></p>
+                    </div>
+                </div>
+
+                <!-- Card de desinscrever-se escondido inicialmente -->
+                <div class="card mt-4" id="unsubscribe-card" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Desinscreva da Newsletter</h5>
+                        <form id="unsubscribe-form">
+                            <div class="form-group">
+                                <label for="unsubscribe-email">Entre com seu e-mail para desinscrever</label>
+                                <input type="email" class="form-control" id="unsubscribe-email" placeholder="email@email.com" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-block">Desinscrever</button>
+                        </form>
+                        <div id="unsubscribe-message" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Mostrar o card de desinscrever-se ao clicar no link
+        document.getElementById('unsubscribe-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('unsubscribe-card').style.display = 'block';
+        });
+
+        // Envio do formulário de inscrição
+        document.getElementById('subscribe-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('email').value;
+            fetch('http://127.0.0.1:5000/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var messageElement = document.getElementById('message');
+                if (data.message === "Email already subscribed") {
+                    messageElement.innerHTML = `<div class="alert alert-warning">Aviso! E-mail já está cadastrado.</div>`;
+                } else if (data.message === "Subscribed successfully!") {
+                    messageElement.innerHTML = `<div class="alert alert-success">Inscrição feita com sucesso!</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Erro: ${error}</div>`;
+            });
+        });
+
+        // Envio do formulário de desinscrição
+        document.getElementById('unsubscribe-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var unsubscribeEmail = document.getElementById('unsubscribe-email').value;
+            fetch('http://127.0.0.1:5000/unsubscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: unsubscribeEmail })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var unsubscribeMessageElement = document.getElementById('unsubscribe-message');
+                if (data.message === "Unsubscribed successfully!") {
+                    unsubscribeMessageElement.innerHTML = `<div class="alert alert-success">Desinscrição feita com sucesso!</div>`;
+                } else if (data.message === "Email not found") {
+                    unsubscribeMessageElement.innerHTML = `<div class="alert alert-warning">Aviso! E-mail não encontrado.</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('unsubscribe-message').innerHTML = `<div class="alert alert-danger">Erro: ${error}</div>`;
+            });
+        });
+    </script>
+</body>
+</html>
